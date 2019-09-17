@@ -1,0 +1,6 @@
+args.json
+*.log
+*.pid
+*.sqlite
+*.sock
+__pycache__
