@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" integrity="sha256-NuCn4IvuZXdBaFKJOAcsU2Q3ZpwbdFisd5dux4jkQ5w=" crossorigin="anonymous"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap-theme.css" integrity="sha256-xOpS+e/dER8z72w+qryCieOGysQI8cELAVt3MHG0phY=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/css/dataTables.bootstrap.min.css" integrity="sha256-PbaYLBab86/uCEz3diunGMEYvjah3uDFIiID+jAtIfw=" crossorigin="anonymous" />
+<!-- link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/css/dataTables.bootstrap.min.css" integrity="sha256-PbaYLBab86/uCEz3diunGMEYvjah3uDFIiID+jAtIfw=" crossorigin="anonymous" / -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/css/jquery.dataTables.min.css" integrity="sha256-YY1izqyhIj4W3iyJOaGWOpXDSwrHWFL4Nfk+W0LyCHE=" crossorigin="anonymous" />
 <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Code+Pro|Source+Sans+Pro|Source+Serif+Pro|Roboto|Roboto+Mono" rel="stylesheet">
 <link href="https://fonts.red-dove.com/iosevka-ss09-regular/webfont.css" rel="stylesheet">
@@ -56,6 +56,7 @@ td.filename {
 tfoot input {
   padding-left: 4px;
   width: 100%;
+  border-radius: 4px;
 }
 </style>
 </head>
@@ -131,18 +132,21 @@ tfoot input {
       var options = {
         autoWidth: false,
         dom: 'ltipr',
+        //orderFixed: [[3, 'asc'], [4, 'asc']],
         columns: [
           {className: 'name'},
           {className: 'sclass'},
           {className: 'typetext'},
           {className: 'filename'},
-          {className: 'sline', sortable: false}
+          {className: 'sline', orderable: false}
         ]
       }
 
       var table = $('#results').DataTable(options);
 
       table.columns(['.filename', '.sline']).order('asc').draw();
+
+      $('#results thead tr .sline').removeClass('sorting_asc');
 
       $('#wait').hide();
       $('#results').show();
