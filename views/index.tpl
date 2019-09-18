@@ -1,6 +1,6 @@
 <%
 #
-# Copyright (C) 2018 Red Dove Consultants Limited. All rights reserved.
+# Copyright (C) 2019 Red Dove Consultants Limited. All rights reserved.
 #
 %>
 <!DOCTYPE html>
@@ -132,7 +132,7 @@ tfoot input {
       var options = {
         autoWidth: false,
         dom: 'ltipr',
-        //orderFixed: [[3, 'asc'], [4, 'asc']],
+        lengthMenu: [20, 40, 60, 80, 100],
         columns: [
           {className: 'name'},
           {className: 'sclass'},

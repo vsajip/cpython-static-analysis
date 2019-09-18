@@ -8,7 +8,7 @@ Static variables are defined all over the place in CPython code in a somewhat _a
 
 CPython serialises access to its static variables using a single Global Interpreter Lock (GIL). In order to reduce dependency on a single GIL, for example to improve support for multiple subinterpreters working with the main Python interpreter, statics need to be tidied up so that concurrency management can be made easier. For example, if all interpreter-related statics were moved to an interpreter-state structure, there could be separate such structure instances per sub-interpreter, each protected by a separate lock, and this would help to improve Python's concurrency support in multi-core environments (which are pretty much the norm these days).
 
-# Methodology
+# Approach
 
 The approach used in this repository is to use the ``clang`` compiler to parse CPython code into an AST, and to walk that AST to look for usage of static variables. By "static", we mean those either explicitly defined as ``static``, or those implicitly defined as ``static`` by having no explicit storage class and defined outside a function.
 

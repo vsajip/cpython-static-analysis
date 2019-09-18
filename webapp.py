@@ -1,5 +1,6 @@
+#!/usr/bin/env python
 #
-# Copyright (C) 2019 Red Dove Consultants Limited
+# Copyright (C) 2019 Vinay Sajip. MIT Licenced.
 #
 
 import datetime
