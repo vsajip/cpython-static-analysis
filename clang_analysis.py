@@ -7,7 +7,6 @@ import json
 import logging
 import os
 import re
-import sqlite3
 
 
 logger = logging.getLogger(__name__)
@@ -114,7 +113,7 @@ def compute_header_paths():
     return [s.decode('utf-8') for s in result]
 
 
-def compute_args(options):
+def compute_args_linux(options):
     result = {}
     header_paths = compute_header_paths()
     python_dir = options.python_dir
@@ -143,8 +142,39 @@ def compute_args(options):
     print(json.dumps(result, sort_keys=True, indent=2))
 
 
+def compute_args_windows(options):
+    result = {}
+    with open(options.compute_args, encoding='utf-8') as f:
+        python_dir = options.python_dir
+        build_dir = os.path.join(python_dir, 'PCbuild')
+        for line in f:
+            s = line.lower()
+            if 'tracker.exe' in s:
+                continue
+            if 'cl.exe' not in s:
+                continue
+            opts = []
+            cfiles = []
+            parts = line.split()
+            for i, p in enumerate(parts):
+                if p.startswith('/I'):
+                    opts.append('-I%s' % p[2:])
+                elif p == '/D':
+                    opts.append('-D%s' % parts[i + 1])
+                elif p.endswith('.c'):
+                    if not os.path.isabs(p):
+                        cp = os.path.abspath(os.path.join(build_dir, p))
+                        cfiles.append(cp)
+            for p in cfiles:
+                rp = os.path.relpath(p, python_dir).replace(os.sep, '/')
+                args = opts + [p]
+                result[rp] = args
+    print(json.dumps(result, sort_keys=True, indent=2))
+
+
 def compute_statics(options):
     import shutil
+    import sqlite3
 
     from clang.cindex import Index, Config, CursorKind, StorageClass
 
@@ -245,7 +275,8 @@ def main():
     logger.debug('options: %s', options)
 
     if options.compute_args:
-        compute_args(options)
+        ca = compute_args_windows if os.name == 'nt' else compute_args_linux
+        ca(options)
     else:
         compute_statics(options)
 
