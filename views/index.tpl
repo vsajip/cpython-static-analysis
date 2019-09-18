@@ -91,7 +91,7 @@ tfoot input {
               <td title="{{ item.name }}">{{ item.name }}</td>
               <td>{{ item.storage_class }}</td>
               <td title="{{ item.type_text }}">{{ item.type_text }}</td>
-              <td title="{{ item.filename }}">{{ item.filename }}</td>
+              <td title="{{ item.filename }}"><a href="https://github.com/python/cpython/blob/master/{{ item.filename }}#L{{ item.start_line }}">{{ item.filename }}</a></td>
               <td>{{ item.start_line }}</td>
               <!-- td>{{ item.start_column }}</td>
               <td>{{ item.end_line }}</td>
