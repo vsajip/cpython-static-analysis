@@ -226,6 +226,10 @@ def compute_statics(options):
                 fn = None
             else:
                 fn = node.extent.start.file.name
+            if os.name == 'nt':
+                if fn:
+                    fn = fn.replace(os.sep, '/')
+                p = p.replace(os.sep, '/')
             if fn != p:
                 continue
             if node.kind != CursorKind.VAR_DECL:
