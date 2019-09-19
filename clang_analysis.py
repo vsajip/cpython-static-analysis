@@ -48,30 +48,34 @@ def run_query(conn, sql, args, update=False):
 
 def register_static(options, name, storage_class, type_text, filename,
                     start_line, start_column, end_line, end_column):
-    SEL_SQL = 'select id from statics where filename = ? and name = ?'
-    INS_SQL = ('insert into statics (name, storage_class, type_text, filename, '
-               'start_line, start_column, end_line, end_column, mark) '
-               'values (?, ?, ?, ?, ?, ?, ?, ?, ?)'
-              )
-    UPD_SQL = ('update statics set name = ?, storage_class = ?, type_text = ?, '
-               'filename = ?, start_line = ?, start_column = ?, end_line = ?, '
-               'end_column = ?, mark = ? where id = ?'
-              )
-    cur = options.conn.cursor()
-    cur.execute(SEL_SQL, (filename, name))
-    rows = cur.fetchall()
-    if not rows:
-        cur.execute(INS_SQL, (name, storage_class, type_text, filename,
-                              start_line, start_column, end_line, end_column,
-                              None))
+    if options.remote_secret:
+        raise NotImplementedError
     else:
-        assert(len(rows) == 1)
-        rid = rows[0][0]
-        cur.execute(UPD_SQL, (name, storage_class, type_text, filename,
-                              start_line, start_column, end_line, end_column,
-                              None, rid))
-    options.conn.commit()
-    cur.close()
+        # update a local database provided in options.conn by caller.
+        SEL_SQL = 'select id from statics where filename = ? and name = ?'
+        INS_SQL = ('insert into statics (name, storage_class, type_text, filename, '
+                   'start_line, start_column, end_line, end_column, mark) '
+                   'values (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                  )
+        UPD_SQL = ('update statics set name = ?, storage_class = ?, type_text = ?, '
+                   'filename = ?, start_line = ?, start_column = ?, end_line = ?, '
+                   'end_column = ?, mark = ? where id = ?'
+                  )
+        cur = options.conn.cursor()
+        cur.execute(SEL_SQL, (filename, name))
+        rows = cur.fetchall()
+        if not rows:
+            cur.execute(INS_SQL, (name, storage_class, type_text, filename,
+                                  start_line, start_column, end_line, end_column,
+                                  None))
+        else:
+            assert(len(rows) == 1)
+            rid = rows[0][0]
+            cur.execute(UPD_SQL, (name, storage_class, type_text, filename,
+                                  start_line, start_column, end_line, end_column,
+                                  None, rid))
+        options.conn.commit()
+        cur.close()
 
 
 def walk_ast(node):
@@ -275,6 +279,9 @@ def main():
     aa('-p', '--python-dir', default=PYTHON_DIR, help='Python source location')
     aa('--clang-dir', default='/usr/lib/llvm-6.0/lib',
        help='Location of clang library (libclang)')
+    aa('--remote-url', default='https://cpython.red-dove.com/',
+    help='URL of a web application to update')
+    aa('--remote-secret', help='Secret for updating a web application')
     options = parser.parse_args()
     logger.debug('options: %s', options)
 

@@ -86,7 +86,7 @@ tfoot input {
             </tr>
           </thead>
           <tbody>
-% for item in app.rows:
+% for item in rows:
             <tr rowid="{{ item.id }}">
               <td title="{{ item.name }}">{{ item.name }}</td>
               <td>{{ item.storage_class }}</td>
