@@ -17,7 +17,7 @@ As a first step, analysis has been done on Linux (Ubuntu). The following steps w
 1. Clone the CPython repository, if you haven't already.
 2. Clone this repository.
 3. Create a virtual environment using a Python3 interpreter and activate it.
-4. Ensure that ``libclang`` is installed on your system. I did this by running ``sudo apt install libclang-6.0-dev``.
+4. Ensure that [``libclang``](https://clang.llvm.org/doxygen/group__CINDEX.html) is installed on your system. I did this by running ``sudo apt install libclang-6.0-dev``.
 5. Ensure that you have SQLite 3 installed. I did this by running ``sudo apt install sqlite3``.
 6. Run ``pip install clang`` to install the Python bindings for ``libclang`` into the virtual environment.
 7. We now need to establish which CPython files to process with ``clang``, and which include directories and preprocessor definitions we need to apply for each such file. To do this, we run, in your clone of the Python repository, ``make 2>&1 > ~/tmp/make.txt``, where you can specify a different filename for the output of the make command. (You may need to run ``./configure`` first to create the Makefile, if it doesn't exist.)
@@ -33,7 +33,7 @@ You can view the results with any SQLite browser (I used ``sudo apt install sqli
 
 1. With the virtual environment active, do ``pip install bottle``.
 2. In your clone of this repository, run ``python webapp.py``.
-3. Open a Web browser and point it to ``localhost:5001``. You should see the analysis results in your browser. My version is deployed at ``https://cpython.red-dove.com/``. It was deployed using ``gunicorn`` and ``supervisor``.
+3. Open a Web browser and point it to [``localhost:5001``](http://localhost:5001/). You should see the analysis results in your browser. My version is deployed at [``https://cpython.red-dove.com/``](https://cpython.red-dove.com/). It was deployed using ``gunicorn`` and ``supervisor``.
 
 # Updating the results
 

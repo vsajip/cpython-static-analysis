@@ -71,6 +71,7 @@ tfoot input {
             declarations (including those inside functions). The analysis was
             done on Linux (Ubuntu) and Windows 10, so variables specific to
             other platforms will not have been captured.</p>
+            <p>The analysis code can be found at <a href="https://github.com/vsajip/cpython-static-analysis/">https://github.com/vsajip/cpython-static-analysis/</a>.</p>
         </div>
         <div id="wait" class="text-center">Getting things ready ...</div>
         <table id="results" class="table display compact" style="display: none">
