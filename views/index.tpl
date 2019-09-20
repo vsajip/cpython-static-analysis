@@ -65,11 +65,12 @@ tfoot input {
     <div class="row clearfix">
       <div class-"col-md-12">
         <div>
-            <h1>CPython Static Variables Analysis Results</h1>
-            <p>The table below was produced using a simplistic analysis using clang. It
-            may contain false positives - it just looked at all static variables. The
-            analysis was done on Linux, so variables specific to other platforms will not
-            have been captured.</p>
+            <h1>CPython Static Variables Analysis Results</h1><p>The table
+            below was produced using a simplistic analysis using clang. It may
+            contain false positives: it just looked at all static variable
+            declarations (including those inside functions). The analysis was
+            done on Linux (Ubuntu) and Windows 10, so variables specific to
+            other platforms will not have been captured.</p>
         </div>
         <div id="wait" class="text-center">Getting things ready ...</div>
         <table id="results" class="table display compact" style="display: none">
