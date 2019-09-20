@@ -37,4 +37,4 @@ You can view the results with any SQLite browser (I used ``sudo apt install sqli
 
 # Updating the results
 
-The results can be cleared and updated from updated CPython sources by passing the ``--new`` flag to `clang_analysis.py``.
+The results can be cleared and updated from updated CPython sources by passing the ``--new`` flag to ``clang_analysis.py``.
