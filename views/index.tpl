@@ -135,10 +135,10 @@ tfoot input {
         dom: 'ltipr',
         lengthMenu: [20, 40, 60, 80, 100],
         columns: [
-          null, // {className: 'name'},
+          {className: 'name'},
           null, // {className: 'sclass'},
           {className: 'typetext'},
-          null, // {className: 'filename'},
+          {className: 'filename'},
           {className: 'sline', orderable: false}
         ]
       }
