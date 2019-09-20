@@ -3,10 +3,12 @@
 # Copyright (C) 2019 Vinay Sajip. MIT Licenced.
 #
 import argparse
+import configparser
 import json
 import logging
 import os
 import re
+import time
 
 
 logger = logging.getLogger(__name__)
@@ -49,10 +51,32 @@ def run_query(conn, sql, args, update=False):
 def register_static(options, name, storage_class, type_text, filename,
                     start_line, start_column, end_line, end_column):
     if options.remote_secret:
-        raise NotImplementedError
+        import jwt
+        from urllib.request import Request, urlopen
+
+        tnow = time.time()
+        payload = {
+            'name': name,
+            'storage_class': storage_class,
+            'type_text': type_text,
+            'filename': filename,
+            'start_line': start_line,
+            'start_column': start_column,
+            'end_line': end_line,
+            'end_column': end_column,
+            'iat': tnow,
+            'nbf': tnow,
+            'exp': tnow + 3600
+        }
+        token = jwt.encode(payload, options.remote_secret, algorithm='HS256')
+        headers = {'Authorization': 'Bearer %s' % token.decode('utf-8')}
+        request = Request(options.remote_url, b'', headers, method='POST')
+        r = urlopen(request)
+        code = r.getcode()
+        if code not in (200, 202):
+            raise ValueError('Unexpected result: %d' % code)
     else:
-        # update a local database provided in options.conn by caller.
-        SEL_SQL = 'select id from statics where filename = ? and name = ?'
+        SEL_SQL = ('select id from statics where filename = ? and name = ?')
         INS_SQL = ('insert into statics (name, storage_class, type_text, filename, '
                    'start_line, start_column, end_line, end_column, mark) '
                    'values (?, ?, ?, ?, ?, ?, ?, ?, ?)'
@@ -279,9 +303,17 @@ def main():
     aa('-p', '--python-dir', default=PYTHON_DIR, help='Python source location')
     aa('--clang-dir', default='/usr/lib/llvm-6.0/lib',
        help='Location of clang library (libclang)')
-    aa('--remote-url', default='https://cpython.red-dove.com/',
-    help='URL of a web application to update')
-    aa('--remote-secret', help='Secret for updating a web application')
+    if not os.path.isfile('config.ini'):
+        remote_secret = remote_url = None
+    else:
+        cp = configparser.ConfigParser()
+        cp.read('config.ini')
+        remote_secret = cp['DEFAULT']['secret']
+        remote_url = cp['DEFAULT']['url']
+    aa('--remote-url', default=remote_url,
+       help='URL of a web application to update')
+    aa('--remote-secret', default=remote_secret,
+       help='Secret for updating a web application')
     options = parser.parse_args()
     logger.debug('options: %s', options)
 

@@ -1,4 +1,5 @@
 args.json
+config.ini
 *.log
 *.pid
 *.sqlite
