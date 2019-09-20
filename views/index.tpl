@@ -33,14 +33,13 @@ td.name, td.typetext, td.filename {
   overflow-x: hidden;
   text-overflow: ellipsis;
 }
-td.sclass {
+th.sclass {
   width: 6em;
 }
 th.sline, th.scol, th.eline, th.ecol {
   width: 2em;
 }
 td.sline, td.scol, td.eline, td.ecol {
-  width: 2em;
   text-align: right;
 }
 td.name {
@@ -77,11 +76,11 @@ tfoot input {
         <table id="results" class="table display compact" style="display: none">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Storage</th>
-              <th>Type</th>
-              <th>Filename</th>
-              <th>Line</th>
+              <th class="name">Name</th>
+              <th class="sclass">Storage</th>
+              <th class="type">Type</th>
+              <th class="filename">Filename</th>
+              <th class="sline">Line</th>
               <!-- th>Column</th>
               <th>End line</th>
               <th>End col</th -->
@@ -136,10 +135,10 @@ tfoot input {
         dom: 'ltipr',
         lengthMenu: [20, 40, 60, 80, 100],
         columns: [
-          {className: 'name'},
-          {className: 'sclass'},
+          null, // {className: 'name'},
+          null, // {className: 'sclass'},
           {className: 'typetext'},
-          {className: 'filename'},
+          null, // {className: 'filename'},
           {className: 'sline', orderable: false}
         ]
       }
@@ -159,6 +158,7 @@ tfoot input {
         $('input', this.footer()).on('keyup change clear', function() {
           if (that.search() !== this.value) {
             that.search(this.value).draw();
+            $('#results thead tr .sline').removeClass('sorting_asc');
           }
         });
       });
