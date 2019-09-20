@@ -27,7 +27,7 @@ As a first step, analysis has been done on Linux (Ubuntu). The following steps w
 
 You can run ``python clang_analysis.py -h`` to get help on other command-line options available.
 
-# Viewing the results via the Web
+# Viewing the results
 
 You can view the results with any SQLite browser (I used ``sudo apt install sqlite-browser`` to install such a browser). Alternatively, you can use code in this repository to assist viewing the code in a Web browser, using the following steps:
 
@@ -35,3 +35,6 @@ You can view the results with any SQLite browser (I used ``sudo apt install sqli
 2. In your clone of this repository, run ``python webapp.py``.
 3. Open a Web browser and point it to ``localhost:5001``. You should see the analysis results in your browser. My version is deployed at ``https://cpython.red-dove.com/``. It was deployed using ``gunicorn`` and ``supervisor``.
 
+# Updating the results
+
+The results can be cleared and updated from updated CPython sources by passing the ``--new`` flag to `clang_analysis.py``.
