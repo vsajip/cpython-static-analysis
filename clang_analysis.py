@@ -322,7 +322,7 @@ def compute_statics(options):
     with open(options.args, encoding='utf-8')  as f:
         arglists = json.load(f)
 
-    if not (options.remote_secret and options.new or
+    if (not options.remote_secret and options.new or
             not os.path.isfile(options.database)):
         logger.info('Creating new database from template: %s.', options.database)
         shutil.copyfile('statics.template.sqlite', options.database)
