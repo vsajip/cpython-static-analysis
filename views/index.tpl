@@ -34,7 +34,7 @@ td.name, td.typetext, td.filename {
   text-overflow: ellipsis;
 }
 th.sclass {
-  width: 6em;
+  width: 7em;
 }
 th.sline, th.scol, th.eline, th.ecol {
   width: 2em;
@@ -69,16 +69,25 @@ tfoot input {
             contain false positives: it just looked at all static variable
             declarations (including those inside functions). The analysis was
             done on Linux (Ubuntu) and Windows 10, so variables specific to
-            other platforms will not have been captured.</p>
-            <p>The analysis code can be found at <a href="https://github.com/vsajip/cpython-static-analysis/"><code>https://github.com/vsajip/cpython-static-analysis/</code></a>.</p>
+            other platforms will not have been captured.</p> <p>The analysis
+            code can be found at <a
+            href="https://github.com/vsajip/cpython-static-analysis/"><code>https://github.com/vsajip/cpython-static-analysis/</code></a>.</p>
+            <p>In the footer of the table below, use the input boxes to filter
+            the table contents by matching to the values in the respective
+            columns. Use a single <code>~</code> to match anything
+            <em>other</em> than the following text - e.g. enter
+            <code>PyTypeObject</code> in the <em>Type</em> column to show only
+            variables matching that type, or type in
+            <code>~PyTypeObject</code> to show rows that <em>don't</em> match
+            <code>PyTypeObject.</code></p>
         </div>
         <div id="wait" class="text-center">Getting things ready ...</div>
         <table id="results" class="table display compact" style="display: none">
           <thead>
             <tr>
-              <th class="name">Name</th>
-              <th class="sclass">Storage</th>
-              <th class="type">Type</th>
+              <th class="name">Variable Name</th>
+              <th class="sclass">Storage Class</th>
+              <th class="type">Variable Type</th>
               <th class="filename">Filename</th>
               <th class="sline">Line</th>
               <!-- th>Column</th>
@@ -101,10 +110,10 @@ tfoot input {
 % end
           </tbody>
           <tfoot>
-            <tr>
-              <td>Name</td>
-              <td>Storage</td>
-              <td>Type</td>
+            <tr class="filters">
+              <td>Variable Name</td>
+              <td>Storage class</td>
+              <td>Variable Type</td>
               <td>Filename</td>
               <td></td>
               <!-- td></td>
@@ -122,7 +131,7 @@ tfoot input {
   <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/js/jquery.dataTables.min.js" integrity="sha256-t5ZQTZsbQi8NxszC10CseKjJ5QeMw5NINtOXQrESGSU=" crossorigin="anonymous"></script>
   <script>
     $(document).ready(function() {
-      $('#results tfoot td').each(function() {
+      $('#results tfoot tr.filters td').each(function() {
         var title = $(this).text();
 
         if (title) {
@@ -143,11 +152,15 @@ tfoot input {
         ]
       }
 
+      function adjust_classes() {
+        $('#results thead tr .sline').removeClass('sorting_asc');
+      }
+
       var table = $('#results').DataTable(options);
 
       table.columns(['.filename', '.sline']).order('asc').draw();
 
-      $('#results thead tr .sline').removeClass('sorting_asc');
+      adjust_classes();
 
       $('#wait').hide();
       $('#results').show();
@@ -174,7 +187,7 @@ tfoot input {
 
             that.search('^(?:(?!' + v + ').)*$', true, false).draw();
           }
-          $('#results thead tr .sline').removeClass('sorting_asc');
+          adjust_classes();
         });
       });
     });
