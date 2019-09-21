@@ -156,10 +156,25 @@ tfoot input {
         var that = this;
 
         $('input', this.footer()).on('keyup change clear', function() {
-          if (that.search() !== this.value) {
-            that.search(this.value).draw();
-            $('#results thead tr .sline').removeClass('sorting_asc');
+          var value;
+          var negate = false;
+
+          value = this.value;
+          if (value[0] === '~') {
+            negate = true;
+            value = value.substring(1);
           }
+          if (!negate) {
+            if (that.search() !== value) {
+              that.search(value).draw();
+            }
+          }
+          else {
+            var v = $.fn.dataTable.util.escapeRegex(value);
+
+            that.search('^(?:(?!' + v + ').)*$', true, false).draw();
+          }
+          $('#results thead tr .sline').removeClass('sorting_asc');
         });
       });
     });
