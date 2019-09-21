@@ -19,10 +19,9 @@
 <style>
 body {
   font-family: "Trebuchet MS";
-  font-size: 18px;
+  font-size: 14px;
 }
 #results {
-  font-size: 14px;
   table-layout: fixed;
 }
 #results tbody td {
@@ -64,22 +63,18 @@ tfoot input {
     <div class="row clearfix">
       <div class-"col-md-12">
         <div>
-            <h1>CPython Static Variables Analysis Results</h1><p>The table
+            <h2>CPython Static Variables Analysis Results</h2><p>The table
             below was produced using a simplistic analysis using clang. It may
             contain false positives: it just looked at all static variable
             declarations (including those inside functions). The analysis was
             done on Linux (Ubuntu) and Windows 10, so variables specific to
             other platforms will not have been captured.</p> <p>The analysis
             code can be found at <a
-            href="https://github.com/vsajip/cpython-static-analysis/"><code>https://github.com/vsajip/cpython-static-analysis/</code></a>.</p>
-            <p>In the footer of the table below, use the input boxes to filter
+            href="https://github.com/vsajip/cpython-static-analysis/"><code>https://github.com/vsajip/cpython-static-analysis/</code></a>.
+            In the footer of the table below, use the input boxes to filter
             the table contents by matching to the values in the respective
-            columns. Use a single <code>~</code> to match anything
-            <em>other</em> than the following text - e.g. enter
-            <code>PyTypeObject</code> in the <em>Type</em> column to show only
-            variables matching that type, or type in
-            <code>~PyTypeObject</code> to show rows that <em>don't</em> match
-            <code>PyTypeObject.</code></p>
+            columns. Use a single leading <code>~</code> to match anything
+            <em>other</em> than the following text.</code></p>
         </div>
         <div id="wait" class="text-center">Getting things ready ...</div>
         <table id="results" class="table display compact" style="display: none">
