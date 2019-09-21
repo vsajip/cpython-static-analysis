@@ -13,12 +13,90 @@ import time
 
 logger = logging.getLogger(__name__)
 
+IGNORED_VARIABLES = {  # Copied from CPython Tools/c-analyzer/c_globals/supported.py
+    # global
+    'PyImport_FrozenModules': 'process-global',
+    'M___hello__': 'process-global',
+    'inittab_copy': 'process-global',
+    'PyHash_Func': 'process-global',
+    '_Py_HashSecret_Initialized': 'process-global',
+    '_TARGET_LOCALES': 'process-global',
 
-CONST_STRUCT_TYPES = re.compile('const (struct|union) '
+    # startup (only changed before/during)
+    '_PyRuntime': 'runtime startup',
+    'runtime_initialized': 'runtime startup',
+    'static_arg_parsers': 'runtime startup',
+    'orig_argv': 'runtime startup',
+    'opt_ptr': 'runtime startup',
+    '_preinit_warnoptions': 'runtime startup',
+    '_Py_StandardStreamEncoding': 'runtime startup',
+    'Py_FileSystemDefaultEncoding': 'runtime startup',
+    '_Py_StandardStreamErrors': 'runtime startup',
+    'Py_FileSystemDefaultEncodeErrors': 'runtime startup',
+    'Py_BytesWarningFlag': 'runtime startup',
+    'Py_DebugFlag': 'runtime startup',
+    'Py_DontWriteBytecodeFlag': 'runtime startup',
+    'Py_FrozenFlag': 'runtime startup',
+    'Py_HashRandomizationFlag': 'runtime startup',
+    'Py_IgnoreEnvironmentFlag': 'runtime startup',
+    'Py_InspectFlag': 'runtime startup',
+    'Py_InteractiveFlag': 'runtime startup',
+    'Py_IsolatedFlag': 'runtime startup',
+    'Py_NoSiteFlag': 'runtime startup',
+    'Py_NoUserSiteDirectory': 'runtime startup',
+    'Py_OptimizeFlag': 'runtime startup',
+    'Py_QuietFlag': 'runtime startup',
+    'Py_UTF8Mode': 'runtime startup',
+    'Py_UnbufferedStdioFlag': 'runtime startup',
+    'Py_VerboseFlag': 'runtime startup',
+    '_Py_path_config': 'runtime startup',
+    '_PyOS_optarg': 'runtime startup',
+    '_PyOS_opterr': 'runtime startup',
+    '_PyOS_optind': 'runtime startup',
+    '_Py_HashSecret': 'runtime startup',
+
+    # REPL
+    '_PyOS_ReadlineLock': 'repl',
+    '_PyOS_ReadlineTState': 'repl',
+
+    # effectively const
+    'tracemalloc_empty_traceback': 'const',
+    '_empty_bitmap_node': 'const',
+    'posix_constants_pathconf': 'const',
+    'posix_constants_confstr': 'const',
+    'posix_constants_sysconf': 'const',
+    '_PySys_ImplCacheTag': 'const',
+    '_PySys_ImplName': 'const',
+    'PyImport_Inittab': 'const',
+    '_PyImport_DynLoadFiletab': 'const',
+    '_PyParser_Grammar': 'const',
+    'Py_hexdigits': 'const',
+    '_PyImport_Inittab': 'const',
+    '_PyByteArray_empty_string': 'const',
+    '_PyLong_DigitValue': 'const',
+    '_Py_SwappedOp': 'const',
+    'PyStructSequence_UnnamedField': 'const',
+
+    # signals are main-thread only
+    'faulthandler_handlers': 'signals are main-thread only',
+    'user_signals': 'signals are main-thread only',
+    'wakeup': 'signals are main-thread only',
+
+    # hacks
+    '_PySet_Dummy': 'only used as a placeholder',
+}
+
+
+CONST_STRUCT_TYPES = re.compile('(const )?(struct|union) '
                                 '(_frozen|dbcs_map|normal_encoding|arraydescr|'
                                 'iso2022_config)')
 
-IGNORED_STRUCT_TYPES = re.compile('(struct )?Py(Module|Method)Def')
+IGNORED_STRUCT_TYPES = re.compile('(struct )?Py(Module|Method|Member|GetSet)Def|'
+                                  'Py(Number|Sequence|Mapping|Async)Methods|'
+                                  'PyBufferProcs|slotdef|newfunc|'
+                                  'PyStructSequence_(Desc|Field)|'
+                                  '_Py_PreInitEntry|_Py_atomic_int|'
+                                  'pthread_condattr_t')
 
 CONST_TYPES = re.compile(r'const ((unsigned )?(char|int|short|long)|'
                          'MultibyteCodec|IntConstantPair|arc|DBCHAR|'
@@ -30,6 +108,26 @@ CONST_TYPES = re.compile(r'const ((unsigned )?(char|int|short|long)|'
 
 PYTHON_DIR = os.path.expanduser('~/projects/python/master')
 
+FILE_SPECIFIC_IGNORED_TYPES = {
+    'Python/graminit.c': re.compile(r'\b(const arc|state)\b'),
+    'Python/symtable.c': re.compile(r'\bidentifier\b'),
+}
+
+FILE_SPECIFIC_IGNORED_VARIABLES = {
+    'Python/Python-ast.c': re.compile('_(field|attribute)$'),
+    'Python/thread.c': re.compile('^initialized|thread_debug$'),
+    'Python/getversion.c': re.compile('^version$'),
+    'Python/fileutils.c': re.compile('^force_ascii|ioctl_works|'
+                                     '_Py_open_cloexec_works$'),
+    'Python/codecs.c': re.compile('^ucnhash_CAPI$'),
+    'Python/bootstrap_hash.c': re.compile('^getrandom_works$'),
+    'Objects/unicodeobject.c': re.compile('^ucnhash_CAPI|bloom_linebreak$'),
+    'Modules/getbuildinfo.c': re.compile('^buildinfo$'),
+    'Modules/posixmodule.c': re.compile('^ticks_per_second|dup3_works$'),
+    'Modules/timemodule.c': re.compile('^ticks_per_second$'),
+    'Objects/longobject.c': re.compile('^$log_base_BASE|convwidth_base|'
+                                       'convmultmax_base'),
+}
 
 def get_diag_info(diag):
     result = {}
@@ -140,6 +238,7 @@ def compute_header_paths():
             in_includes = True
     return [s.decode('utf-8') for s in result]
 
+EXTRA_DEFS = ['-DCOUNT_ALLOCS']
 
 def compute_args_linux(options):
     result = {}
@@ -164,6 +263,7 @@ def compute_args_linux(options):
                         args.append('-I%s' % s)
                     elif item.startswith('-D'):
                         args.append(item)
+                args.extend(EXTRA_DEFS)
                 args.extend(header_paths)
                 args.append(p)
                 result[rp] = args
@@ -193,6 +293,7 @@ def compute_args_windows(options):
                     if not os.path.isabs(p):
                         cp = os.path.abspath(os.path.join(build_dir, p))
                         cfiles.append(cp)
+            opts.extend(EXTRA_DEFS)
             for p in cfiles:
                 rp = os.path.relpath(p, python_dir).replace(os.sep, '/')
                 args = opts + [p]
@@ -221,12 +322,16 @@ def compute_statics(options):
     with open(options.args, encoding='utf-8')  as f:
         arglists = json.load(f)
 
-    if options.new or not os.path.isfile(options.database):
+    if not (options.remote_secret and options.new or
+            not os.path.isfile(options.database)):
         logger.info('Creating new database from template: %s.', options.database)
         shutil.copyfile('statics.template.sqlite', options.database)
 
     options.conn = sqlite3.connect(options.database)
-    logger.info('Computing statics into %s.', options.database)
+    if options.remote_secret:
+        logger.info('Computing statics into %s.', options.remote_url)
+    else:
+        logger.info('Computing statics into %s.', options.database)
 
     for rp in sorted(arglists):
         p = os.path.join(options.python_dir, rp)
@@ -260,6 +365,11 @@ def compute_statics(options):
                 p = p.replace(os.sep, '/')
             if fn != p:
                 continue
+            if node.spelling in IGNORED_VARIABLES:
+                continue
+            if (rp in FILE_SPECIFIC_IGNORED_VARIABLES and
+                FILE_SPECIFIC_IGNORED_VARIABLES[rp].search(node.spelling)):
+                continue
             if node.kind != CursorKind.VAR_DECL:
                 continue
             if node.storage_class == StorageClass.EXTERN:
@@ -274,6 +384,9 @@ def compute_statics(options):
             if IGNORED_STRUCT_TYPES.match(ts):
                 continue
             if CONST_TYPES.search(ts):
+                continue
+            if (rp in FILE_SPECIFIC_IGNORED_TYPES and
+                FILE_SPECIFIC_IGNORED_TYPES[rp].search(ts)):
                 continue
             start = node.extent.start
             end = node.extent.end
@@ -303,7 +416,12 @@ def main():
     aa('-p', '--python-dir', default=PYTHON_DIR, help='Python source location')
     aa('--clang-dir', default='/usr/lib/llvm-6.0/lib',
        help='Location of clang library (libclang)')
-    if not os.path.isfile('config.ini'):
+    aa('--no-config', default=False, action='store_true',
+       help='Ignore any configuration file')
+
+    options, args = parser.parse_known_args()
+
+    if options.no_config or not os.path.isfile('config.ini'):
         remote_secret = remote_url = None
     else:
         cp = configparser.ConfigParser()
