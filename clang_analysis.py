@@ -163,7 +163,7 @@ def register_static(options, name, storage_class, type_text, filename,
             'end_line': end_line,
             'end_column': end_column,
             'iat': tnow,
-            'nbf': tnow,
+            # 'nbf': tnow,
             'exp': tnow + 3600
         }
         token = jwt.encode(payload, options.remote_secret, algorithm='HS256')

@@ -124,8 +124,8 @@ def statics_analysis():
     auth = auth[7:].encode('utf-8')
     payload = jwt.decode(auth, app.secret, algorithms='HS256')
     tnow = time.time()
-    if 'nbf' not in payload or tnow < payload['nbf']:
-        bottle.abort(400)
+    # if 'nbf' not in payload or tnow < payload['nbf']:
+        # bottle.abort(400)
     if 'exp' not in payload or tnow > payload['exp']:
         bottle.abort(400)
     rc = update(payload['name'], payload['storage_class'], payload['type_text'],
