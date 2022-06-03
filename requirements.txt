@@ -1,4 +1,4 @@
-bottle==0.12.17
+bottle==0.12.20
 clang==6.0.0.2
 gunicorn==19.9.0
 supervisor==4.0.4
